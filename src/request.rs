@@ -1,7 +1,13 @@
+use itertools::Itertools;
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize, Serializer};
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
+
+#[derive(Debug)]
+pub enum Error {
+    NotAnAttributeTypeIdentifier,
+}
 
 /// An IRMA AttributeType identifies an attribute
 #[derive(Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
@@ -24,6 +30,26 @@ pub struct Attribute {
 impl Ord for Attribute {
     fn cmp(&self, other: &Self) -> Ordering {
         self.atype.cmp(&other.atype)
+    }
+}
+
+impl Attribute {
+    pub fn new(atype: String, value: Option<String>) -> Result<Self, Error> {
+        match atype
+            .split('.')
+            .collect_tuple()
+            .map(|(scheme, issuer, credential, attribute)| AttributeType {
+                scheme: scheme.to_string(),
+                issuer: issuer.to_string(),
+                credential: credential.to_string(),
+                attribute: attribute.to_string(),
+            }) {
+            None => Err(Error::NotAnAttributeTypeIdentifier),
+            Some(attr_type) => Ok(Attribute {
+                atype: attr_type,
+                value: value,
+            }),
+        }
     }
 }
 
@@ -78,37 +104,17 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_sort() {
-        let req = AttributeCon {
-            0: vec![
-                AttributeRequest {
-                    attribute: Attribute {
-                        atype: AttributeType {
-                            scheme: String::from("pbdf"),
-                            issuer: String::from("pbdf"),
-                            credential: String::from("email"),
-                            attribute: String::from("email"),
-                        },
-                        value: None,
-                    },
-                    not_null: true,
-                },
-                AttributeRequest {
-                    attribute: Attribute {
-                        atype: AttributeType {
-                            scheme: String::from("pbdf"),
-                            issuer: String::from("pbdf"),
-                            credential: String::from("email"),
-                            attribute: String::from("domain"),
-                        },
-                        value: None,
-                    },
-                    not_null: true,
-                },
-            ],
-        };
+    fn test_sort() -> Result<(), Error> {
+        let attr1 = Attribute::new(String::from("pbdf.pbdf.email.email"), None)?;
+        let attr2 = Attribute::new(String::from("pbdf.pbdf.email.domain"), None)?;
+        let attr3 = Attribute::new(String::from("pbdf.pbdf.fmail.email"), None)?;
+        let attr4 = Attribute::new(String::from("1.2.3.4.5"), None);
 
-        // Because 'e' comes after 'd'
-        assert_eq!(Ordering::Greater, req.0[0].cmp(&req.0[1]));
+        assert_eq!(attr4.is_err(), true);
+        assert_eq!(Ordering::Greater, attr1.cmp(&attr2));
+        assert_eq!(Ordering::Equal, attr1.cmp(&attr1));
+        assert_eq!(Ordering::Less, attr2.cmp(&attr3));
+
+        Ok(())
     }
 }
