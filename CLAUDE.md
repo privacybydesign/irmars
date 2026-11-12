@@ -27,7 +27,7 @@ the Rust client that runs that session.
   endpoints and its `SessionResult`/`proofStatus` JSON are the contract these
   types mirror, so a change there can invalidate them without touching this
   repo. CI pins the server binary at a release tag (`.github/workflows/rust.yml`).
-- `encryption4all/postguard` — `pg-core`, `pg-pkg` and `pg-cli` depend on this
+- `privacybydesign/postguard` — `pg-core`, `pg-pkg` and `pg-cli` depend on this
   crate under a rename: `irma = { package = "irmars", version = "0.2.2" }`. The
   coupling is a crates.io version pin, not the repo, so nothing landed here
   reaches PostGuard until a release is published and that pin moves, security
@@ -35,8 +35,8 @@ the Rust client that runs that session.
 - `tweedegolf/irmars` — the upstream this repo forks from; its `main` has not
   moved since 2021, though a side branch saw one commit in 2023. Not synced; do
   not expect changes to flow either way.
-- `privacybydesign/irmars` — an archived namesake, not this repo. Pass
-  `--repo encryption4all/irmars` to `gh` so a command cannot land on it.
+- `privacybydesign/irmars-archive` — an archived namesake that held this name
+  until this repo moved into the org. Not this repo.
 
 ## What is not in this file
 

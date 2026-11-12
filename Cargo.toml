@@ -6,7 +6,7 @@ authors = [
     "Ruben Hensen <r.hensen@caesar.nl>",
 ]
 edition = "2021"
-repository = "https://github.com/encryption4all/irmars"
+repository = "https://github.com/privacybydesign/irmars"
 license = "Apache-2.0"
 description = "A rust interface for interacting with IRMA servers (encryption4all fork)"
 readme = "README.md"
